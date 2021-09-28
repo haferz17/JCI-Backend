@@ -5,6 +5,8 @@ RewriteRule ^auth/?$ auth.php [NC,L]
 RewriteRule ^auth/([A-Za-z0-9_-s]+)/?$ auth.php?type=$1 [NC,L]
 RewriteRule ^laundry/?$ laundry.php [NC,L]
 RewriteRule ^laundry/([0-9]+)/?$ laundry.php?id=$1 [NC,L]
+RewriteRule ^notif/?$ notif.php [NC,L]
+RewriteRule ^notif/([0-9]+)/?$ notif.php?id=$1 [NC,L]
 
 php_value upload_ax_filesize 128M
 php_value post_max_size 128M

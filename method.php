@@ -286,4 +286,69 @@ class Laundry {
 		echo json_encode($response);
 	}
 }
+class Notif {
+    public function getNotif($id=0){
+		global $mysqli;
+		$query="SELECT * FROM notif";
+		if($id) $query.=" WHERE id='$id' LIMIT 1";
+		else $query.=" ORDER BY created_at DESC";
+		$data=array();
+		$result=$mysqli->query($query);
+		
+		if($result){
+			while($row=mysqli_fetch_object($result)) $data[]=$row;
+			$response=array(
+				'status' => 1,
+				'message' =>'Get Notif Successfully.',
+				'data' => $data
+			);
+		} else {
+			$response=array(
+				'status' => 0,
+				'message' =>'Get Notif Failed.',
+				'error' => $mysqli->error
+			);
+		}
+
+		header('Content-Type: application/json');
+		echo json_encode($response);
+	}
+
+	public function createNotif(){
+		global $mysqli;
+		$arrcheckpost = array('title' => '', 'description' => '', 'sender_id' => '', 'receiver_id' => '');
+		$hitung = count(array_intersect_key($_POST, $arrcheckpost));
+
+		if($hitung == count($arrcheckpost) && $_POST['title'] && $_POST['description'] && $_POST['sender_id'] && $_POST['receiver_id']){
+			$result = $mysqli->query( 
+				"INSERT INTO notif SET
+				title='$_POST[title]',
+				description='$_POST[description]',
+				sender_id='$_POST[sender_id]',
+				receiver_id='$_POST[receiver_id]',
+				created_at=now()"
+			);	
+			if($result){
+				$response=array(
+					'status' => 1,
+					'message' =>'Create Notif Successfully.',
+				);
+			} else {
+				$response=array(
+					'status' => 0,
+					'message' =>'Create Notif Failed.',
+					'error' => $mysqli->error
+				);
+			}
+		} else {
+			$response=array(
+				'status' => 0,
+				'message' =>'Parameter Do Not Match'
+			);
+		}
+
+		header('Content-Type: application/json');
+		echo json_encode($response);
+	}
+}
 ?>
