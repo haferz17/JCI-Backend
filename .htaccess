@@ -3,3 +3,11 @@ RewriteRule ^user/?$ user.php [NC,L]
 RewriteRule ^user/([0-9]+)/?$ user.php?id=$1 [NC,L]
 RewriteRule ^auth/?$ auth.php [NC,L]
 RewriteRule ^auth/([A-Za-z0-9_-s]+)/?$ auth.php?type=$1 [NC,L]
+RewriteRule ^laundry/?$ laundry.php [NC,L]
+RewriteRule ^laundry/([0-9]+)/?$ laundry.php?id=$1 [NC,L]
+
+php_value upload_ax_filesize 128M
+php_value post_max_size 128M
+php_value max_execution_time 300
+php_value max_input_time 300
+php_value memory_limit 256M
