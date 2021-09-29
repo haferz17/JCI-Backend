@@ -1,5 +1,6 @@
 <?php
 require_once "koneksi.php";
+include "pushNotif.php";
 class User {
     public function getUser($id=0){
 		global $mysqli;
@@ -69,6 +70,9 @@ class Auth {
 		while($row=mysqli_fetch_object($result)) $data[]=$row;
 		
 		if($data){
+			$id=$data[0]->id;
+			$queryUpdate="UPDATE user SET fcm='$_POST[fcm]',updated_at=now() WHERE id='$id'";
+			$mysqli->query($queryUpdate);
 			$response=array(
 				'status' => 1,
 				'message' =>'Login Successfully.',
@@ -129,7 +133,60 @@ class Auth {
 		echo json_encode($response);
 	}
 }
-class Laundry {
+
+class Notif {
+    public function getNotif($id=0){
+		global $mysqli;
+		$query="SELECT * FROM notif";
+		if($id) $query.=" WHERE id='$id' LIMIT 1";
+		else $query.=" ORDER BY created_at DESC";
+		$data=array();
+		$result=$mysqli->query($query);
+		
+		if($result){
+			while($row=mysqli_fetch_object($result)) $data[]=$row;
+			$response=array(
+				'status' => 1,
+				'message' =>'Get Notif Successfully.',
+				'data' => $data
+			);
+		} else {
+			$response=array(
+				'status' => 0,
+				'message' =>'Get Notif Failed.',
+				'error' => $mysqli->error
+			);
+		}
+
+		header('Content-Type: application/json');
+		echo json_encode($response);
+	}
+
+	public function createNotif($type, $sender, $receiver, $laundry){
+		global $mysqli;
+		$notifBody = getNotifBody($type, $sender, $receiver, $laundry);
+		if($notifBody->sender_id && $notifBody->receiver_id){
+			$result = $mysqli->query( 
+				"INSERT INTO notif SET
+				title='$notifBody->title',
+				description='$notifBody->description',
+				sender_id='$notifBody->sender_id',
+				receiver_id='$notifBody->receiver_id',
+				laundry_id='$notifBody->laundry_id',
+				created_at=now()"
+			);	
+			if($result){
+				$resultUser=$mysqli->query("SELECT * FROM user WHERE id='$receiver' LIMIT 1");
+				if($resultUser) {
+					$data=mysqli_fetch_object($resultUser);
+					sendNotif($notifBody->title,$notifBody->description,$data->fcm);
+				}
+			}
+		} 
+	}
+}
+
+class Laundry extends Notif {
     public function getLaundry($id=0){
 		global $mysqli;
 		$query="SELECT * FROM laundry";
@@ -210,6 +267,8 @@ class Laundry {
 					"INSERT INTO laundry SET
 					id_user='$_POST[id_user]',
 					user='$newDataUser',
+					id_admin='0',
+					admin='',
 					note='$_POST[note]',
 					status='unconfirmed',
 					created_at=now(),
@@ -217,6 +276,7 @@ class Laundry {
 				);	
 
 				if($result){
+					$this->createNotif('unconfirmed', $_POST['id_user'], '1', '0');
 					$response=array(
 						'status' => 1,
 						'message' =>'Laundry Request Successfully.',
@@ -264,6 +324,13 @@ class Laundry {
 			$query.=" WHERE id='$id'";
 			$result = $mysqli->query($query);	
 			if($result){
+				if($_POST['status']!='canceled'){
+					$resultLaundry=$mysqli->query("SELECT * FROM laundry WHERE id='$id' LIMIT 1");
+						if($resultLaundry){
+							$dataLaundry=$resultLaundry->fetch_assoc();
+							$this->createNotif($_POST['status'], $dataLaundry['id_admin'], $dataLaundry['id_user'], $id);
+						}
+					}
 				$response=array(
 					'status' => 1,
 					'message' =>'Update Laundry Status Successfully.',
@@ -286,69 +353,3 @@ class Laundry {
 		echo json_encode($response);
 	}
 }
-class Notif {
-    public function getNotif($id=0){
-		global $mysqli;
-		$query="SELECT * FROM notif";
-		if($id) $query.=" WHERE id='$id' LIMIT 1";
-		else $query.=" ORDER BY created_at DESC";
-		$data=array();
-		$result=$mysqli->query($query);
-		
-		if($result){
-			while($row=mysqli_fetch_object($result)) $data[]=$row;
-			$response=array(
-				'status' => 1,
-				'message' =>'Get Notif Successfully.',
-				'data' => $data
-			);
-		} else {
-			$response=array(
-				'status' => 0,
-				'message' =>'Get Notif Failed.',
-				'error' => $mysqli->error
-			);
-		}
-
-		header('Content-Type: application/json');
-		echo json_encode($response);
-	}
-
-	public function createNotif(){
-		global $mysqli;
-		$arrcheckpost = array('title' => '', 'description' => '', 'sender_id' => '', 'receiver_id' => '');
-		$hitung = count(array_intersect_key($_POST, $arrcheckpost));
-
-		if($hitung == count($arrcheckpost) && $_POST['title'] && $_POST['description'] && $_POST['sender_id'] && $_POST['receiver_id']){
-			$result = $mysqli->query( 
-				"INSERT INTO notif SET
-				title='$_POST[title]',
-				description='$_POST[description]',
-				sender_id='$_POST[sender_id]',
-				receiver_id='$_POST[receiver_id]',
-				created_at=now()"
-			);	
-			if($result){
-				$response=array(
-					'status' => 1,
-					'message' =>'Create Notif Successfully.',
-				);
-			} else {
-				$response=array(
-					'status' => 0,
-					'message' =>'Create Notif Failed.',
-					'error' => $mysqli->error
-				);
-			}
-		} else {
-			$response=array(
-				'status' => 0,
-				'message' =>'Parameter Do Not Match'
-			);
-		}
-
-		header('Content-Type: application/json');
-		echo json_encode($response);
-	}
-}
-?>
