@@ -165,7 +165,7 @@ class Notif {
 	public function createNotif($type, $sender, $receiver, $laundry){
 		global $mysqli;
 		$notifBody = getNotifBody($type, $sender, $receiver, $laundry);
-		if($notifBody->sender_id && $notifBody->receiver_id){
+		if($notifBody->sender_id){
 			$result = $mysqli->query( 
 				"INSERT INTO notif SET
 				title='$notifBody->title',
@@ -176,10 +176,15 @@ class Notif {
 				created_at=now()"
 			);	
 			if($result){
-				$resultUser=$mysqli->query("SELECT * FROM user WHERE id='$receiver' LIMIT 1");
+				$query="SELECT * FROM user ";
+				if($receiver) $query.="WHERE id='$receiver' LIMIT 1";
+				else $query.="WHERE role='admin'";
+				$resultUser=$mysqli->query($query);
 				if($resultUser) {
-					$data=mysqli_fetch_object($resultUser);
-					sendNotif($notifBody->title,$notifBody->description,$data->fcm);
+					$fcm=array();
+					if($receiver) $fcm[]=mysqli_fetch_object($resultUser)->fcm;
+					else while($row=mysqli_fetch_object($resultUser)) $fcm[]=$row->fcm;
+					sendNotif($notifBody->title, $notifBody->description, $fcm);
 				}
 			}
 		} 
@@ -276,7 +281,7 @@ class Laundry extends Notif {
 				);	
 
 				if($result){
-					$this->createNotif('unconfirmed', $_POST['id_user'], '1', '0');
+					$this->createNotif('unconfirmed', $_POST['id_user'], '0', '0');
 					$response=array(
 						'status' => 1,
 						'message' =>'Laundry Request Successfully.',

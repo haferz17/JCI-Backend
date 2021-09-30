@@ -1,5 +1,5 @@
 <?php
-function getNotifBody($type,$sender,$receiver,$laundry) {
+function getNotifBody($type, $sender, $receiver, $laundry) {
 	$notifBody = new StdClass();
 	$notifBody->sender_id = $sender;
 	$notifBody->receiver_id = $receiver;
@@ -45,7 +45,7 @@ function getNotifBody($type,$sender,$receiver,$laundry) {
 	return $notifBody;
 }
 
-function sendNotif($title,$description,$fcm) {
+function sendNotif($title, $description, $fcm) {
   $url = 'https://fcm.googleapis.com/fcm/send';
   // Server Key
   $apiKey = "AAAA6ebio0c:APA91bER4-UrLBCvCZnr-xffmviI98oJLJLOJbDryUuDSoBL_6nUP0oh75xaU5p6WpJKH_a33tZ0TabXHDIkqZG5rditAPM7fOCBBbi2KByibLqnPS0Gk50ND9Fie1sv4ghqgZh9d3rJ";
@@ -58,13 +58,12 @@ function sendNotif($title,$description,$fcm) {
   $notifData = [
     'title' => $title,
     'body' => $description,
+    // "click_action"=> "HelloCordova"
   ];
   // Create the api body
-  $apiBody = [
-    'notification' => $notifData,
-    'to' => $fcm
-    // 'to' => 'eQayRX9mSUusaVZ7rv9MMM:APA91bFcwjs5MLUoQXYKP5YdwGgkAPDYb9T3Opdwf7Jl4uxoxR42IJnDyvoYuYKYSIvGw1USELt_Jn6c433i6fWhT6_G8eC9qATpM2IoxSAPyUADGJzOIefvcMerzeWnxZyTCegNlBLm'
-  ];
+  $apiBody = ['notification' => $notifData];
+  if(count($fcm)<=1) $apiBody['to'] = $fcm[0];
+  else $apiBody['registration_ids'] = $fcm;
   // Initialize curl with the prepared headers and body
   $ch = curl_init();
   curl_setopt ($ch, CURLOPT_URL, $url);
