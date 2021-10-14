@@ -1,4 +1,6 @@
 RewriteEngine On # Turn on the rewriting engine
+RewriteRule ^$ public/ [L]
+RewriteRule (.*) public/$1 [L]
 RewriteRule ^user/?$ user.php [NC,L]
 RewriteRule ^user/([0-9]+)/?$ user.php?id=$1 [NC,L]
 RewriteRule ^auth/?$ auth.php [NC,L]
