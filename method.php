@@ -31,7 +31,7 @@ class User extends Upload
 		$hitung = count(array_intersect_key($_POST, $arrcheckpost));
 
 		if ($hitung == count($arrcheckpost) && $_POST['name'] && $_POST['email']) {
-			$avatar = $this->createFile();
+			$avatar = $_FILES['file']['name'] ? $this->createFile() : $_POST['avatar'];
 			$result = $mysqli->query(
 				"UPDATE user SET
 				name='$_POST[name]',
@@ -91,7 +91,7 @@ class Auth
 			$response = array(
 				'status' => 0,
 				'message' => 'Login Failed.',
-				'error' => $query
+				'error' => $mysqli->error
 			);
 		}
 
@@ -112,6 +112,7 @@ class Auth
 				email='$_POST[email]',
 				password=md5('$_POST[password]'),
 				role='$_POST[role]',
+				fcm='',
 				phone='',
 				address='',
 				latitude='',
@@ -176,9 +177,12 @@ class Laundry extends Notif
 		global $mysqli;
 		$query = "SELECT * FROM laundry ";
 		if ($filter == 1) $query .= "WHERE status='unconfirmed'";
-		elseif ($filter == 2) $query .= "WHERE id_user='$_POST[id_user]' and status NOT IN('unconfirmed')";
+		elseif ($filter == 2) $query .= "WHERE id_admin='$_POST[id_admin]' and status NOT IN('unconfirmed')";
 		elseif ($filter == 3) $query .= "WHERE id_user='$_POST[id_user]'";
-		$query .= " ORDER BY created_at DESC";
+		elseif ($filter == 4) $query .= "WHERE id_user='$_POST[id_user]' and status NOT IN('done','canceled')";
+		elseif ($filter == 5) $query .= "WHERE id_user='$_POST[id_user]' and status='done'";
+		elseif ($filter == 6) $query .= "WHERE id_admin='$_POST[id_admin]' and status NOT IN('unconfirmed','done')";
+		$query .= " ORDER BY created_at DESC LIMIT 10";
 		$data = array();
 		$result = $mysqli->query($query);
 
@@ -235,6 +239,7 @@ class Laundry extends Notif
 					note='$_POST[note]',
 					status='unconfirmed',
 					image='$image',
+					weight='$_POST[weight]',
 					created_at=now(),
 					updated_at=now()"
 				);
@@ -352,6 +357,32 @@ class Notif extends Upload
 		$query = "SELECT * FROM notif";
 		if ($id) $query .= " WHERE id='$id' LIMIT 1";
 		else $query .= " ORDER BY created_at DESC";
+		$data = array();
+		$result = $mysqli->query($query);
+
+		if ($result) {
+			while ($row = mysqli_fetch_object($result)) $data[] = $row;
+			$response = array(
+				'status' => 1,
+				'message' => 'Get Notif Successfully.',
+				'data' => $data
+			);
+		} else {
+			$response = array(
+				'status' => 0,
+				'message' => 'Get Notif Failed.',
+				'error' => $mysqli->error
+			);
+		}
+
+		header('Content-Type: application/json');
+		echo json_encode($response);
+	}
+
+	public function getNotifWithFilter()
+	{
+		global $mysqli;
+		$query = "SELECT * FROM notif WHERE receiver_id='$_POST[id]' ORDER BY created_at DESC";
 		$data = array();
 		$result = $mysqli->query($query);
 

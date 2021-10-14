@@ -8,10 +8,9 @@ switch ($request_method) {
                 $notif->getNotif($id);
                 break;
 	case 'POST':
-                $notif->createNotif();
+                $notif->getNotifWithFilter();
                 break;
         default:
                 header("HTTP/1.0 405 Method Not Allowed");
                 break;
 }
-?>
