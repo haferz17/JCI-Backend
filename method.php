@@ -229,7 +229,6 @@ class Laundry extends Notif
 				$dataUser->avatar = $data['avatar'];
 				$newDataUser = json_encode($dataUser);
 				$image =  $_FILES['file']['name'] ? $this->createFile() : $_POST['image'];
-
 				$result = $mysqli->query(
 					"INSERT INTO laundry SET
 					id_user='$_POST[id_user]',
@@ -249,6 +248,7 @@ class Laundry extends Notif
 					$response = array(
 						'status' => 1,
 						'message' => 'Laundry Request Successfully.',
+						'data' => $newDataUser
 					);
 				} else {
 					$response = array(
