@@ -226,12 +226,13 @@ class Laundry extends Notif
 				$dataUser->address = $data['address'];
 				$dataUser->latitude = $data['latitude'];
 				$dataUser->longitude = $data['longitude'];
-				$dataUser->avatar = $data['avatar'];
 				$newDataUser = json_encode($dataUser);
 				$image =  $_FILES['file']['name'] ? $this->createFile() : $_POST['image'];
 				$result = $mysqli->query(
 					"INSERT INTO laundry SET
 					id_user='$_POST[id_user]',
+					avatar_user='$data[avatar]',
+					avatar_admin='',
 					user='$newDataUser',
 					id_admin='0',
 					admin='',
@@ -247,8 +248,7 @@ class Laundry extends Notif
 					$this->createNotif('unconfirmed', $_POST['id_user'], '0', '0');
 					$response = array(
 						'status' => 1,
-						'message' => 'Laundry Request Successfully.',
-						'data' => $newDataUser
+						'message' => 'Laundry Request Successfully.'
 					);
 				} else {
 					$response = array(
@@ -286,9 +286,8 @@ class Laundry extends Notif
 					$dataAdmin->phone = $data['phone'];
 					$dataAdmin->latitude = $data['latitude'];
 					$dataAdmin->longitude = $data['longitude'];
-					$dataAdmin->avatar = $data['avatar'];
 					$newDataAdmin = json_encode($dataAdmin);
-					$query .= ",id_admin='$_POST[id_admin]',admin='$newDataAdmin'";
+					$query .= ",id_admin='$_POST[id_admin]',admin='$newDataAdmin',avatar_admin='$data[avatar]'";
 				}
 			}
 			$query .= " WHERE id='$id'";
