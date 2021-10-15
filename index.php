@@ -1,2 +1,2 @@
 <?php
-require_once "method.php";
+echo "Welcome to JCI API";

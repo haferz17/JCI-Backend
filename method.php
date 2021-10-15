@@ -228,7 +228,7 @@ class Laundry extends Notif
 				$dataUser->longitude = $data['longitude'];
 				$dataUser->avatar = $data['avatar'];
 				$newDataUser = json_encode($dataUser);
-				$image = $this->createFile();
+				$image =  $_FILES['file']['name'] ? $this->createFile() : $_POST['image'];
 
 				$result = $mysqli->query(
 					"INSERT INTO laundry SET

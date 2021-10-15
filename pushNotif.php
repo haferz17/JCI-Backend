@@ -48,7 +48,7 @@ function getNotifBody($type, $sender, $receiver, $laundry) {
 function sendNotif($title, $description, $fcm) {
   $url = 'https://fcm.googleapis.com/fcm/send';
   // Server Key
-  $apiKey = "AAAA6ebio0c:APA91bER4-UrLBCvCZnr-xffmviI98oJLJLOJbDryUuDSoBL_6nUP0oh75xaU5p6WpJKH_a33tZ0TabXHDIkqZG5rditAPM7fOCBBbi2KByibLqnPS0Gk50ND9Fie1sv4ghqgZh9d3rJ";
+  $apiKey = "AAAAi9lREEs:APA91bFBqcOAp7LwqxbCxSyU5wlbOfxhYDwdlDQQriSIYcw-BdYWKCMvvtGFzu661bwa1zO2Xi1BTQJEznWe6q1htoCZotDJjpHAXEIkIvDTqcfdEooFkOuaM3dHfG6d7sEqdD1S1zIO";
   // Compile headers in one variable
   $headers = array (
     'Authorization:key=' . $apiKey,
@@ -78,4 +78,3 @@ function sendNotif($title, $description, $fcm) {
 
   return $result;
 }
-?>
